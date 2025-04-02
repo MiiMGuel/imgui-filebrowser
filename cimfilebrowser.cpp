@@ -9,8 +9,10 @@ extern "C" {
         std::string directory;
     };
 
-    ImFileBrowser* ImFileBrowser_Create() {
-        return new ImFileBrowser();
+    ImFileBrowser* ImFileBrowser_Create(ImFileBrowserFlags_t flags) {
+        ImFileBrowser* browser = new ImFileBrowser();
+        browser->fbrowser = ImGui::FileBrowser((ImGuiFileBrowserFlags_)flags);
+        return browser;
     }
 
     void ImFileBrowser_Destroy(ImFileBrowser* browser) {
@@ -59,7 +61,10 @@ extern "C" {
     }
     
     const char* ImFileBrowser_GetDirectory(ImFileBrowser* browser) {
-        browser->directory = browser->fbrowser.GetDirectory().string();
+        std::string dir = browser->fbrowser.GetDirectory().string();
+        if (dir.empty()) return NULL;
+
+        browser->directory = dir; 
         return browser->directory.c_str();
     }
 

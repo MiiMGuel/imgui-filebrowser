@@ -13,8 +13,54 @@
 #include <imfilebrowser.h>
 ```
 
-Instead of creating a file dialog with an immediate function call, you need to create a `ImGui::FileBrowser` instance, open it with member function `Open()`, and call `Display()` in each frame. Here is a simple example:
+Instead of creating a file dialog with an immediate function call, you need to create a `ImGui::FileBrowser` instance, open it with member function `Open()`, and call `Display()` in each frame.
 
+## C Example
+```cpp
+#include <cimgui.h>
+#include <cimfilebrowser.h>
+
+int main()
+{
+    //...initialize rendering window and imgui
+    
+    // create a file browser instance
+    ImFileBrowser* fileDialog = ImFileBrowser_Create(0);
+    
+    // (optional) set browser properties
+    ImFileBrowser_SetTitle(fileDialog, "title");
+    char* filter[3] = {".h", ".hpp", ".c", ".cpp"};
+    ImFileBrowser_SetTypeFilters(fileDialog, filter, 3);
+    
+    // mainloop
+    while(continueRendering)
+    {
+        //...do other stuff like ImGui::NewFrame();
+        
+        if(igBegin("dummy window", NULL, 0))
+        {
+            // open file dialog when user clicks this button
+            if(igButton("open file dialog", (ImVec2){.x=0,.y=0}))
+                ImFileBrowser_Open(fileDialog);
+        }
+        igEnd();
+        
+        ImFileBrowser_Display(fileDialog);
+        
+        if(ImFileBrowser_HasSelected(fileDialog))
+        {
+            printf("Selected filename", ImFileBrowser_GetSelected(fileDialog));
+            ImFileBrowser_ClearSelected(fileDialog);
+        }
+        
+        //...do other stuff like ImGui::Render();
+    }
+    
+    //...shutdown
+}
+```
+
+## CPP Example
 ```cpp
 #include <imgui.h>
 #include <imfilebrowser.h>
@@ -62,6 +108,26 @@ int main()
 
 Various options can be combined with '|' and passed to the constructor:
 
+### C
+``` c
+typedef enum ImFileBrowserFlags {
+    ImFileBrowserFlags_SelectDirectory       = 1 << 0,  // select directory instead of regular file
+    ImFileBrowserFlags_EnterNewFilename      = 1 << 1,  // allow user to enter new filename when selecting regular file
+    ImFileBrowserFlags_NoModal               = 1 << 2,  // file browsing window is modal by default. specify this to use a popup window
+    ImFileBrowserFlags_NoTitleBar            = 1 << 3,  // hide window title bar
+    ImFileBrowserFlags_NoStatusBar           = 1 << 4,  // hide status bar at the bottom of browsing window
+    ImFileBrowserFlags_CloseOnEsc            = 1 << 5,  // close file browser when pressing 'ESC'
+    ImFileBrowserFlags_CreateNewDir          = 1 << 6,  // allow user to create new directory
+    ImFileBrowserFlags_MultipleSelection     = 1 << 7,  // allow user to select multiple files. this will hide ImFileBrowserFlags_EnterNewFilename
+    ImFileBrowserFlags_HideRegularFiles      = 1 << 8,  // hide regular files when ImFileBrowserFlags_SelectDirectory is enabled
+    ImFileBrowserFlags_ConfirmOnEnter        = 1 << 9,  // confirm selection when pressing 'ENTER'
+    ImFileBrowserFlags_SkipItemsCausingError = 1 << 10, // when entering a new directory, any error will interrupt the process, causing the file browser to fall back to the working directory.
+                                                           // with this flag, if an error is caused by a specific item in the directory, that item will be skipped, allowing the process to continue.
+    ImFileBrowserFlags_EditPathString        = 1 << 11, // allow user to directly edit the whole path string
+} ImFileBrowserFlags_t;
+```
+
+### CPP
 ```cpp
 enum ImGuiFileBrowserFlags_
 {
